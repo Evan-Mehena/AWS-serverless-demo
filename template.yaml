@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS Serverless Demo - Lambda + API Gateway + DynamoDB
+
+Resources:
+  DemoTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: DemoTable
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  DemoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: DemoFunction
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.9
+      CodeUri: ./
+      Environment:
+        Variables:
+          TABLE_NAME: DemoTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: DemoTable
+      Events:
+        AddItemApi:
+          Type: Api
+          Properties:
+            Path: /add-item
+            Method: post
+        GetItemApi:
+          Type: Api
+          Properties:
+            Path: /get-item
+            Method: get
